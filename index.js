@@ -1,6 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import { quizzesData, createQuzzes } from './controllers/QuizzesController.js';
+import { quizzesData, createQuzzes,updateQuzzes } from './controllers/QuizzesController.js';
 import cors from 'cors';
 
 const app = express();
@@ -22,6 +22,8 @@ app.get('/', (req, res) => {
 app.get('/quizze', quizzesData);
 app.get('/quizze/:topic/:level', quizzesData)
 app.post('/quizze', createQuzzes)
+
+app.patch('/quizze/:id', updateQuzzes)
 
 app.listen(5555, (err) => {
     if (err) {
