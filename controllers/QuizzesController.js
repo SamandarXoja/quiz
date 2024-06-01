@@ -6,30 +6,31 @@ export const quizzesData = async (req, res) => {
 
         if (topic && level) {
             const quizzes = await Quizzes.find({ topics: topic, level: level });
-            const formattedQuizzes = [];
-
-
-            for (let i = 0; i < quizzes.length; i += 4) {
-                const quizGroup = quizzes.slice(i, i + 4);
-                const groupObject = quizGroup.reduce((acc, quiz) => {
-                    if (quiz.question && !acc.question) {
-                        acc.question = quiz.question;
-                        acc.code = quiz.code;
-                        acc.explanation = quiz.explanation
-                    }
-                    acc.quizzes.push({
+            const formattedQuizzes = quizzes.reduce((acc, quiz) => {
+                const existingQuestion = acc.find(q => q.question === quiz.question);
+                if (existingQuestion) {
+                    existingQuestion.answers.push({
                         _id: quiz._id,
                         answer: quiz.answer,
                         isCorrect: quiz.isCorrect,
+                    });
+                } else {
+                    acc.push({
+                        _id: quiz._id,
+                        question: quiz.question,
+                        code: quiz.code,
+                        explanation: quiz.explanation,
                         level: quiz.level,
                         topics: quiz.topics,
-                        __v: quiz.__v
+                        answers: [{
+                            _id: quiz._id,
+                            answer: quiz.answer,
+                            isCorrect: quiz.isCorrect,
+                        }]
                     });
-                    return acc;
-                }, { question: "", quizzes: [] });
-
-                formattedQuizzes.push(groupObject);
-            }
+                }
+                return acc;
+            }, []);
 
             return res.json({ [level]: { [topic]: formattedQuizzes } });
         }
@@ -47,30 +48,31 @@ export const quizzesData = async (req, res) => {
             result[level] = {};
             topicsList.forEach(topic => {
                 const filteredQuizzes = quizzes.filter(quizz => quizz.level === level && quizz.topics === topic);
-                const formattedQuizzes = [];
-
-                // Группировка викторин по 4 в отдельные объекты
-                for (let i = 0; i < filteredQuizzes.length; i += 4) {
-                    const quizGroup = filteredQuizzes.slice(i, i + 4);
-                    const groupObject = quizGroup.reduce((acc, quiz) => {
-                        if (quiz.question && !acc.question) {
-                            acc.question = quiz.question;
-                            acc.code = quiz.code;
-                            acc.code = quiz.explanation
-                        }
-                        acc.quizzes.push({
+                const formattedQuizzes = filteredQuizzes.reduce((acc, quiz) => {
+                    const existingQuestion = acc.find(q => q.question === quiz.question);
+                    if (existingQuestion) {
+                        existingQuestion.answers.push({
                             _id: quiz._id,
                             answer: quiz.answer,
                             isCorrect: quiz.isCorrect,
+                        });
+                    } else {
+                        acc.push({
+                            _id: quiz._id,
+                            question: quiz.question,
+                            code: quiz.code,
+                            explanation: quiz.explanation,
                             level: quiz.level,
                             topics: quiz.topics,
-                            __v: quiz.__v
+                            answers: [{
+                                _id: quiz._id,
+                                answer: quiz.answer,
+                                isCorrect: quiz.isCorrect,
+                            }]
                         });
-                        return acc;
-                    }, { question: "", quizzes: [] });
-
-                    formattedQuizzes.push(groupObject);
-                }
+                    }
+                    return acc;
+                }, []);
 
                 if (formattedQuizzes.length > 0) {
                     result[level][topic] = formattedQuizzes;
@@ -131,7 +133,7 @@ export const updateQuzzes = async (req, res) => {
             level: req.body.level,
             topics: req.body.topics
         })
-        
+
         res.json({
             success: true,
         })
