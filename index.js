@@ -23,7 +23,7 @@ app.get('/quizze', quizzesData);
 app.get('/quizze/:topic/:level', quizzesData)
 app.post('/quizze', createQuzzes)
 
-app.patch('/quizze/:id', updateQuzzes)
+app.patch('/quizze/:topic/:level/:id', updateQuzzes)
 
 app.listen(5555, (err) => {
     if (err) {

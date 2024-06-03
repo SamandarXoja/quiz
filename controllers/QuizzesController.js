@@ -98,10 +98,12 @@ export const createQuzzes = async (req, res) => {
 
 export const updateQuzzes = async (req, res) => {
     try {
-        const dataId = req.params.id;
+        const { id, topic, level } = req.params;
 
         await Quizzes.updateOne({
-            _id: dataId,
+            _id: id,
+            topics: topic,
+            level: level
 
         }, {
             question: req.body.question,
