@@ -1,6 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import { quizzesData, createQuzzes,updateQuzzes } from './controllers/QuizzesController.js';
+import { quizzesData, createQuzzes, updateQuzzes } from './controllers/QuizzesController.js';
 import cors from 'cors';
 
 const app = express();
