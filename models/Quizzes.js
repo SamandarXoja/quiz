@@ -1,20 +1,6 @@
 import mongoose from "mongoose";
 
-
-const QuizzesSchema = new mongoose.Schema({
-    question: {
-        type: String,
-        required: false
-    },
-    code: {
-        type: String,
-        required: false,
-    },
-    explanation: {
-        type: String,
-        required: true
-    },
-
+const AnswerSchema = new mongoose.Schema({
     answer: {
         type: String,
         required: true
@@ -22,16 +8,31 @@ const QuizzesSchema = new mongoose.Schema({
     isCorrect: {
         type: Boolean,
         required: true
+    }
+});
+
+const QuizzesSchema = new mongoose.Schema({
+    question: {
+        type: String,
+        required: true
     },
+    code: {
+        type: String,
+        required: false
+    },
+    explanation: {
+        type: String,
+        required: true
+    },
+    answers: [AnswerSchema],
     level: {
         type: String,
         required: true
     },
-    topics: {
+    topic: {
         type: String,
         required: true
     }
-
-})
+});
 
 export default mongoose.model('Quizzes', QuizzesSchema);
