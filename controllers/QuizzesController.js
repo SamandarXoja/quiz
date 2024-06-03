@@ -1,38 +1,43 @@
 import Quizzes from "../models/Quizzes.js";
-
 export const quizzesData = async (req, res) => {
     try {
         const { topic, level } = req.params;
 
-        if (topic && level) {
-            const quizzes = await Quizzes.find({ topics: topic, level: level });
-            const formattedQuizzes = quizzes.reduce((acc, quiz) => {
-                const existingQuestion = acc.find(q => q.question === quiz.question);
-                if (existingQuestion) {
-                    existingQuestion.answers.push({
-                        _id: quiz._id,
-                        answer: quiz.answer,
-                        isCorrect: quiz.isCorrect,
-                    });
-                } else {
-                    acc.push({
+        const formatQuizzes = (quizzes) => {
+            const formattedQuizzes = [];
+            const questionMap = new Map();
+
+            quizzes.forEach(quiz => {
+                if (!questionMap.has(quiz.question)) {
+                    questionMap.set(quiz.question, {
                         _id: quiz._id,
                         question: quiz.question,
                         code: quiz.code,
                         explanation: quiz.explanation,
                         level: quiz.level,
                         topics: quiz.topics,
-                        answers: [{
-                            _id: quiz._id,
-                            answer: quiz.answer,
-                            isCorrect: quiz.isCorrect,
-                        }]
+                        answers: []
                     });
                 }
-                return acc;
-            }, []);
+                const question = questionMap.get(quiz.question);
+                if (question.answers.length < 4) {
+                    question.answers.push({
+                        _id: quiz._id,
+                        answer: quiz.answer,
+                        isCorrect: quiz.isCorrect,
+                    });
+                }
+            });
 
-            return res.json({ [level]: { [topic]: formattedQuizzes } });
+            questionMap.forEach(value => formattedQuizzes.push(value));
+
+            return formattedQuizzes;
+        };
+
+        if (topic && level) {
+            const quizzes = await Quizzes.find({ topics: topic, level: level });
+            const formattedQuizzes = formatQuizzes(quizzes);
+            return res.json(formattedQuizzes);
         }
 
         const quizzes = await Quizzes.find();
@@ -42,40 +47,15 @@ export const quizzesData = async (req, res) => {
             "generators", "dom", "browser_apis"
         ];
         const levels = ['beginner', 'intermediate', 'advanced'];
-        const result = {};
+        let result = [];
 
         levels.forEach(level => {
-            result[level] = {};
             topicsList.forEach(topic => {
                 const filteredQuizzes = quizzes.filter(quizz => quizz.level === level && quizz.topics === topic);
-                const formattedQuizzes = filteredQuizzes.reduce((acc, quiz) => {
-                    const existingQuestion = acc.find(q => q.question === quiz.question);
-                    if (existingQuestion) {
-                        existingQuestion.answers.push({
-                            _id: quiz._id,
-                            answer: quiz.answer,
-                            isCorrect: quiz.isCorrect,
-                        });
-                    } else {
-                        acc.push({
-                            _id: quiz._id,
-                            question: quiz.question,
-                            code: quiz.code,
-                            explanation: quiz.explanation,
-                            level: quiz.level,
-                            topics: quiz.topics,
-                            answers: [{
-                                _id: quiz._id,
-                                answer: quiz.answer,
-                                isCorrect: quiz.isCorrect,
-                            }]
-                        });
-                    }
-                    return acc;
-                }, []);
+                const formattedQuizzes = formatQuizzes(filteredQuizzes);
 
                 if (formattedQuizzes.length > 0) {
-                    result[level][topic] = formattedQuizzes;
+                    result = result.concat(formattedQuizzes);
                 }
             });
         });
@@ -88,7 +68,6 @@ export const quizzesData = async (req, res) => {
         });
     }
 };
-
 export const createQuzzes = async (req, res) => {
     try {
 
