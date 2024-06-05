@@ -34,5 +34,6 @@ const QuizzesSchema = new mongoose.Schema({
         required: true
     }
 });
+QuizzesSchema.index({ topic: 1, level: 1 });
 
 export default mongoose.model('Quizzes', QuizzesSchema);

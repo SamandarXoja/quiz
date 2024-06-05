@@ -19,11 +19,11 @@ app.get('/', (req, res) => {
     res.send('hello')
 })
 
-app.get('/quizze', quizzesData);
-app.get('/quizze/:topic/:level', quizzesData)
-app.post('/quizze', createQuzzes)
+app.get('/quizzes', quizzesData);
+app.get('/quizzes/:topic/:level', quizzesData)
+app.post('/quizzes', createQuzzes)
 
-app.patch('/quizze/:topic/:level/:id', updateQuzzes)
+app.patch('/quizzes/:topic/:level/:id', updateQuzzes)
 
 app.listen(5555, (err) => {
     if (err) {
