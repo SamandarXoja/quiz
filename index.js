@@ -1,7 +1,8 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import { quizzesData, createQuzzes, updateQuzzes } from './controllers/QuizzesController.js';
+import { quizzesData, createQuzzes, updateQuzzes, userMessage } from './controllers/QuizzesController.js';
 import cors from 'cors';
+import { userMessages } from './validations/auth.js';
 
 const app = express();
 
@@ -22,6 +23,8 @@ app.get('/', (req, res) => {
 app.get('/quizzes', quizzesData);
 app.get('/quizzes/:topic/:level', quizzesData)
 app.post('/quizzes', createQuzzes)
+
+app.post('/quizzes/users', userMessages, userMessage)
 
 app.patch('/quizzes/:topic/:level/:id', updateQuzzes)
 

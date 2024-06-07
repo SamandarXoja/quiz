@@ -1,4 +1,5 @@
 import Quizzes from "../models/Quizzes.js";
+import Users from "../models/Users.js";
 
 const getRandomItems = (array, numItems) => {
     const shuffled = array.sort(() => 0.5 - Math.random());
@@ -19,7 +20,7 @@ export const quizzesData = async (req, res) => {
         const levels = ['beginner', 'intermediate', 'advanced'];
 
         let quizzes;
-        
+
         if (topic && level) {
             // Если указаны параметры topic и level
             quizzes = await Quizzes.find({ topic, level }).lean().exec();
@@ -100,6 +101,29 @@ export const updateQuzzes = async (req, res) => {
         console.log(err);
         res.status(500).json({
             message: 'Не удалось обнавит quizze'
+        })
+    }
+}
+
+export const userMessage = async (req, res) => {
+    try {
+
+        const { fullName, email, message } = req.body
+
+        const newUser = new Users({
+            fullName,
+            email,
+            message
+        })
+
+        const savedUser = await newUser.save();
+        res.status(201).json(savedUser)
+
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({
+            message: 'Не удалось создат'
         })
     }
 }
