@@ -6,3 +6,9 @@ export const userMessages = [
     body('email', 'Нерерный формат почты').isEmail(),
     body('message', 'Укажите текск').isLength({ min: 3 }),
 ]
+
+export const feedback = [
+    body('email', 'Нерерный формат почты').isEmail(),
+    body('message', 'Укажите текск').isLength({ min: 2 }),
+
+]

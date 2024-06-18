@@ -1,6 +1,6 @@
 import Quizzes from "../models/Quizzes.js";
 import Users from "../models/Users.js";
-
+import Userfeedback from "../models/Userfeedback.js";
 const getRandomItems = (array, numItems) => {
     const shuffled = array.sort(() => 0.5 - Math.random());
     return shuffled.slice(0, numItems);
@@ -126,4 +126,28 @@ export const userMessage = async (req, res) => {
             message: 'Не удалось создат'
         })
     }
+}
+
+
+export const Useropinions = async (req, res) => {
+
+    try {
+        const { quizId, email, message } = req.body;
+
+        const UsersFeedbacks = new Userfeedback({
+            quizId,
+            email,
+            message
+        })
+
+        const savedFeedbacks = await UsersFeedbacks.save();
+        res.status(201).json(savedFeedbacks);
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({
+            message: 'Не удалось создат'
+        })
+    }
+
 }

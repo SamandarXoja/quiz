@@ -1,8 +1,8 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import { quizzesData, createQuzzes, updateQuzzes, userMessage } from './controllers/QuizzesController.js';
+import { quizzesData, createQuzzes, updateQuzzes, userMessage, Useropinions } from './controllers/QuizzesController.js';
 import cors from 'cors';
-import { userMessages } from './validations/auth.js';
+import { feedback, userMessages } from './validations/auth.js';
 
 const app = express();
 
@@ -27,6 +27,9 @@ app.post('/quizzes', createQuzzes)
 app.post('/quizzes/users', userMessages, userMessage)
 
 app.patch('/quizzes/:topic/:level/:id', updateQuzzes)
+app.post('/quizzes/feedbacks', feedback, Useropinions)
+
+
 
 app.listen(5555, (err) => {
     if (err) {
