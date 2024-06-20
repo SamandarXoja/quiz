@@ -8,53 +8,54 @@ const getRandomItems = (array, numItems) => {
 
 export const quizzesData = async (req, res) => {
     try {
-        const { topic, level, size } = req.query;
-        const numItems = size ? parseInt(size, 10) : 10; // Используем 10 по умолчанию, если size не указано
-
-        // Списки тем и уровней
-        const topicsList = [
-            "operators", "loops", "data_types", "functions", "objects",
-            "prototypes", "promises_async_await", "classes", "event_loop",
-            "generators", "dom", "browser_apis"
-        ];
-        const levels = ['beginner', 'intermediate', 'advanced'];
-
-        let quizzes;
-
-        if (topic && level) {
-            // Если указаны параметры topic и level
-            quizzes = await Quizzes.find({ topic, level }).lean().exec();
-        } else if (level && !topic) {
-            // Если указан только level
-            quizzes = await Quizzes.find({ level }).lean().exec();
+      const { topic, level, size } = req.query;
+      const numItems = size ? parseInt(size, 10) : 10; // Используем 10 по умолчанию, если size не указано
+  
+      let quizzes;
+  
+      if (level) {
+        if (topic) {
+          // Если указаны параметры topic и level
+          quizzes = await Quizzes.find({ topic, level }).lean().exec();
         } else {
-            // Если параметры не указаны, выбираем все
-            quizzes = await Quizzes.find({}).lean().exec();
-        }
-
-        // Группируем по темам и уровням, и выбираем случайные элементы
-        const groupedQuizzes = quizzes.reduce((acc, quiz) => {
-            const key = `${quiz.topic}-${quiz.level}`;
-            if (!acc[key]) {
-                acc[key] = [];
-            }
-            acc[key].push(quiz);
+          // Если указан только level, выбираем все квизы с этим уровнем
+          quizzes = await Quizzes.find({ level }).lean().exec();
+          // Группируем по темам и выбираем случайные темы
+          const groupedQuizzes = quizzes.reduce((acc, quiz) => {
+            if (!acc[quiz.topic]) acc[quiz.topic] = [];
+            acc[quiz.topic].push(quiz);
             return acc;
-        }, {});
-
-        let result = [];
-        for (const key in groupedQuizzes) {
-            result = result.concat(getRandomItems(groupedQuizzes[key], numItems));
+          }, {});
+  
+          quizzes = Object.values(groupedQuizzes).flat();
         }
-
-        res.json(result);
+      } else {
+        // Если level не указан, выбираем все квизы
+        quizzes = await Quizzes.find({}).lean().exec();
+      }
+  
+      // Если параметр topic не указан, выбираем случайные темы
+      if (!topic && level) {
+        const groupedQuizzes = quizzes.reduce((acc, quiz) => {
+          if (!acc[quiz.topic]) acc[quiz.topic] = [];
+          acc[quiz.topic].push(quiz);
+          return acc;
+        }, {});
+  
+        quizzes = Object.values(groupedQuizzes).map(group => getRandomItems(group, Math.ceil(numItems / Object.keys(groupedQuizzes).length))).flat();
+      }
+  
+      // Выбираем случайные элементы из общей выборки
+      const result = getRandomItems(quizzes, numItems);
+  
+      res.json(result);
     } catch (err) {
-        console.log(err);
-        res.status(500).json({
-            message: 'Не удалось получить вопросы'
-        });
+      console.log(err);
+      res.status(500).json({
+        message: 'Не удалось получить вопросы'
+      });
     }
-};
+  };
 
 export const createQuzzes = async (req, res) => {
     try {
